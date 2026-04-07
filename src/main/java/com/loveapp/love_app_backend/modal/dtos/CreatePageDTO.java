@@ -1,0 +1,31 @@
+package com.loveapp.love_app_backend.modal.dtos;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.JoinColumn;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Getter
+@Setter
+public class CreatePageDTO {
+
+    private String receiverName;
+
+    private String senderName;
+
+    private String message;
+
+    private LocalDate relationshipStartDate;
+
+    private String musicUrl;
+
+    private String theme;
+
+    private java.util.List<String> photos;
+
+}
