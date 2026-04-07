@@ -20,6 +20,10 @@ public class Page {
     @GeneratedValue
     private UUID id;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(unique = true)
     private String slug;
 
@@ -32,7 +36,9 @@ public class Page {
 
     private LocalDate relationshipStartDate;
 
-    private String musicUrl;
+    private String musicId;
+
+    private String musicTitle;
 
     private String theme;
 
