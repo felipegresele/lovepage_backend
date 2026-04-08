@@ -9,10 +9,13 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
 public class CreatePageDTO {
+
+    private UUID userId;
 
     private String receiverName;
 
@@ -28,6 +31,6 @@ public class CreatePageDTO {
 
     private String theme;
 
-    private java.util.List<String> photos;
+    private List<String> photos;
 
 }

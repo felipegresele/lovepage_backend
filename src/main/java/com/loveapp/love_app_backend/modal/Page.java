@@ -1,5 +1,7 @@
 package com.loveapp.love_app_backend.modal;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.loveapp.love_app_backend.modal.types.PlanType;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -22,6 +24,7 @@ public class Page {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
 
     @Column(unique = true)
@@ -42,7 +45,8 @@ public class Page {
 
     private String theme;
 
-    private String planType;
+    @Enumerated(EnumType.STRING)
+    private PlanType planType;
 
     private String status;
 
