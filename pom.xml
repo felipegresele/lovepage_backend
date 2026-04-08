@@ -66,6 +66,11 @@
 			<artifactId>javase</artifactId>
 			<version>3.5.3</version>
 		</dependency>
+		<!-- Lib para enviar Email -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
 		<!-- Mercado Pago SDK -->
 		<dependency>
 			<groupId>com.mercadopago</groupId>

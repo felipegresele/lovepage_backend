@@ -14,4 +14,6 @@ public interface PageRepository extends JpaRepository<Page, UUID> {
 
     List<Page> findByPlanType(PlanType planType);
 
+    Optional<Page> findByPaymentId(String paymentId);
+
 }

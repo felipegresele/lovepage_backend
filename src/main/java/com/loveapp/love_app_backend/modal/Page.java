@@ -1,6 +1,7 @@
 package com.loveapp.love_app_backend.modal;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.loveapp.love_app_backend.modal.types.PageStatus;
 import com.loveapp.love_app_backend.modal.types.PlanType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,9 +49,12 @@ public class Page {
     @Enumerated(EnumType.STRING)
     private PlanType planType;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private PageStatus status = PageStatus.PENDING;
 
     private LocalDateTime createdAt;
+
+    private String paymentId;
 
     @ElementCollection
     @CollectionTable(name = "page_photos", joinColumns = @JoinColumn(name = "page_id"))

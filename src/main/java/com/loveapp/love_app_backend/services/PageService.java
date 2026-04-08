@@ -3,6 +3,7 @@ package com.loveapp.love_app_backend.services;
 import com.loveapp.love_app_backend.modal.Page;
 import com.loveapp.love_app_backend.modal.User;
 import com.loveapp.love_app_backend.modal.dtos.CreatePageDTO;
+import com.loveapp.love_app_backend.modal.types.PageStatus;
 import com.loveapp.love_app_backend.modal.types.PlanType;
 import com.loveapp.love_app_backend.repositories.PageRepository;
 import com.loveapp.love_app_backend.repositories.UserRepository;
@@ -33,6 +34,8 @@ public class PageService {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
 
+        PlanType planType = dto.getPlanType();
+
         Page page = Page.builder()
                 .user(user)
                 .receiverName(dto.getReceiverName())
@@ -43,8 +46,9 @@ public class PageService {
                 .theme(dto.getTheme())
                 .relationshipStartDate(dto.getRelationshipStartDate())
                 .photos(dto.getPhotos())
+                .planType(planType) // salvar o plano selecionado
                 .slug(UUID.randomUUID().toString().substring(0,6))
-                .status("DRAFT")
+                .status(PageStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -59,7 +63,7 @@ public class PageService {
 
     public void deleteExpiredPages() {
         // Busca todas as páginas normais
-        List<Page> normalPages = repository.findByPlanType(PlanType.NORMAL);
+        List<Page> normalPages = repository.findByPlanType(PlanType.PADRAO);
 
         for (Page page : normalPages) {
             // Verifica se já passou 24 horas
@@ -69,8 +73,32 @@ public class PageService {
         }
     }
 
+    // Salva o preferenceId (checkout) na página
+    public void savePaymentId(UUID pageId, String preferenceId) {
+        Page page = repository.findById(pageId)
+                .orElseThrow(() -> new RuntimeException("Página não encontrada!"));
+        page.setStatus(PageStatus.PENDING); // status enquanto pagamento não confirmado
+        page.setPaymentId(preferenceId); // você precisa criar este campo no Page
+        repository.save(page);
+    }
+
+    // Busca página pelo preferenceId
+    public Page getByPaymentId(String preferenceId) {
+        return repository.findByPaymentId(preferenceId)
+                .orElseThrow(() -> new RuntimeException("Página não encontrada pelo pagamento!"));
+    }
+
+    // Marca a página como paga
+    public void markAsPaid(UUID pageId) {
+        Page page = repository.findById(pageId)
+                .orElseThrow(() -> new RuntimeException("Página não encontrada!"));
+        page.setStatus(PageStatus.PAID);
+        repository.save(page);
+    }
+
     public Page getBySlug(String slug){
         return repository.findBySlug(slug).orElseThrow();
     }
+
 
 }
