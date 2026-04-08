@@ -17,7 +17,7 @@ public class PaymentService {
     @Value("${mercadopago.token}")
     private String token;
 
-    public String createPayment(BigDecimal amount, String title) throws Exception {
+    public String createPayment(BigDecimal amount, String title, String notificationUrl) throws Exception {
 
         MercadoPagoConfig.setAccessToken(token);
 
@@ -29,16 +29,25 @@ public class PaymentService {
                         .unitPrice(amount)
                         .build();
 
+        PreferenceBackUrlsRequest backUrls =
+                PreferenceBackUrlsRequest.builder()
+                        .success("https://heartlink.com/sucesso")
+                        .failure("https://heartlink.com/erro")
+                        .pending("https://heartlink.com/pendente")
+                        .build();
+
         PreferenceRequest preferenceRequest =
                 PreferenceRequest.builder()
                         .items(List.of(item))
+                        .backUrls(backUrls)
+                        .notificationUrl(notificationUrl)
                         .build();
 
         PreferenceClient client = new PreferenceClient();
-
         Preference preference = client.create(preferenceRequest);
 
-        return preference.getInitPoint();
+        // Retorna tanto o initPoint quanto o preferenceId separados
+        return preference.getInitPoint() + "|" + preference.getId();
     }
 
     public boolean isPaymentApproved(Long paymentId) throws Exception {
@@ -49,5 +58,4 @@ public class PaymentService {
 
         return "approved".equals(payment.getStatus());
     }
-
 }

@@ -7,10 +7,7 @@ import com.loveapp.love_app_backend.services.PageService;
 import com.loveapp.love_app_backend.services.PaymentService;
 import com.loveapp.love_app_backend.services.QRCodeService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -38,35 +35,46 @@ public class PaymentController {
         BigDecimal amount = dto.getPlanType().getPrice();
 
         // Cria o pagamento no Mercado Pago
-        String checkout = paymentService.createPayment(amount, "Página romântica personalizada");
+        String result = paymentService.createPayment(amount, "Página romântica personalizada", "https://heartlink.com/api/payment/webhook");
 
-        // Salva o preferenceId (checkout) na página para acompanhar depois
-        pageService.savePaymentId(dto.getPageId(), checkout);
+        // result = "initPoint|preferenceId"
+        String[] parts = result.split("\\|");
+        String initPoint = parts[0];
+        String preferenceId = parts[1];
 
-        return ResponseEntity.ok(checkout);
+        // Salva o preferenceId na página para acompanhar depois
+        pageService.savePaymentId(dto.getPageId(), preferenceId);
+
+        return ResponseEntity.ok(initPoint);
     }
 
     @PostMapping("/webhook")
-    public ResponseEntity<?> paymentWebhook(@RequestBody Map<String, Object> payload) throws Exception {
-        // O ID do pagamento vem como número
-        Long paymentId = Long.parseLong(payload.get("data.id").toString());
+    public ResponseEntity<?> paymentWebhook(
+            @RequestParam(value = "type", required = false) String type,
+            @RequestBody Map<String, Object> payload) throws Exception {
 
-        // Verifica se pagamento foi aprovado
-        if(paymentService.isPaymentApproved(paymentId)) {
-            // Busca a página associada pelo preferenceId
-            String preferenceId = payload.get("preference_id").toString();
+        if (!"payment".equals(type)) {
+            return ResponseEntity.ok("Ignored");
+        }
+
+        // O payload vem como: { "data": { "id": "12345" } }
+        Map<String, Object> dataMap = (Map<String, Object>) payload.get("data");
+        Long paymentId = Long.parseLong(dataMap.get("id").toString());
+
+        if (paymentService.isPaymentApproved(paymentId)) {
+            // Busca a página pelo paymentId (preferenceId salvo antes)
+            // Precisa buscar via paymentService ou direto pelo preferenceId do webhook
+            // O MP envia o preference_id no payload também
+            String preferenceId = dataMap.containsKey("preference_id")
+                    ? dataMap.get("preference_id").toString()
+                    : null;
+
+            if (preferenceId == null) return ResponseEntity.ok("No preference_id");
+
             Page page = pageService.getByPaymentId(preferenceId);
 
-            // Gera QR code
-            byte[] qrCode = qrCodeService.generate("https://sualoja.com/p/" + page.getSlug());
-
-            emailService.sendEmailWithQRCode(
-                    page.getUser().getEmail(),
-                    page.getUser().getUsername(),
-                    qrCode
-            );
-
-            // Atualiza status da página
+            byte[] qrCode = qrCodeService.generate("https://heartlink.com/p/" + page.getSlug());
+            emailService.sendEmailWithQRCode(page.getUser().getEmail(), page.getUser().getUsername(), qrCode);
             pageService.markAsPaid(page.getId());
         }
 
