@@ -100,5 +100,9 @@ public class PageService {
         return repository.findBySlug(slug).orElseThrow();
     }
 
+    public Page getById(UUID id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Página não encontrada!"));
+    }
 
 }
