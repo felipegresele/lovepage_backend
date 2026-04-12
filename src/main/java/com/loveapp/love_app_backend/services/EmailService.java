@@ -1,26 +1,32 @@
 package com.loveapp.love_app_backend.services;
 
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import com.resend.Resend;
+import com.resend.core.exception.ResendException;
+import com.resend.services.emails.model.Attachment;
+import com.resend.services.emails.model.CreateEmailOptions;
+import com.resend.services.emails.model.CreateEmailResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.Base64;
+import java.util.List;
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${resend.api-key}")
+    private String resendApiKey;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
+    public void sendEmailWithQRCode(String to, String userName, byte[] qrCodeBytes) throws ResendException {
 
-    public void sendEmailWithQRCode(String to, String userName, byte[] qrCodeBytes) throws Exception {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        Resend resend = new Resend(resendApiKey);
 
-        helper.setTo(to);
-        helper.setSubject("Sua página personalizada Rearts está pronta!");
+        String qrCodeBase64 = Base64.getEncoder().encodeToString(qrCodeBytes);
+
+        Attachment attachment = Attachment.builder()
+                .fileName("qrcode.png")
+                .content(qrCodeBase64)
+                .build();
 
         String body = String.format(
                 "Olá %s,\n\n" +
@@ -32,12 +38,15 @@ public class EmailService {
                 userName
         );
 
-        helper.setText(body);
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from("Rearts <onboarding@resend.dev>")
+                .to(List.of(to))
+                .subject("Sua página personalizada Rearts está pronta!")
+                .text(body)
+                .attachments(List.of(attachment))
+                .build();
 
-        // Anexando QR code
-        ByteArrayResource resource = new ByteArrayResource(qrCodeBytes);
-        helper.addAttachment("qrcode.png", resource);
-
-        mailSender.send(message);
+        CreateEmailResponse response = resend.emails().send(params);
+        System.out.println("[EMAIL] Enviado com sucesso! id=" + response.getId());
     }
 }
