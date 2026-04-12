@@ -28,25 +28,36 @@ public class EmailService {
                 .content(qrCodeBase64)
                 .build();
 
+        String subject = String.format("Sua surpresa da HeartCode está pronta, %s!", userName);
+
         String body = String.format(
-                "Olá %s,\n\n" +
-                        "Aqui é da equipe Rearts! Muito obrigado pela sua compra.\n\n" +
-                        "Sua página romântica personalizada está pronta para ser acessada.\n" +
-                        "Basta escanear o QR Code em anexo para visualizar a página.\n\n" +
-                        "Esperamos que você aproveite e compartilhe momentos especiais!\n\n" +
-                        "Com carinho,\nEquipe Rearts",
+                "Olá, %s!\n\n" +
+
+                        "O amor está nos detalhes… e agora ele também está em um código exclusivo ❤️\n\n" +
+
+                        "Sua página personalizada da HeartCode já saiu do forno e está pronta para emocionar!\n" +
+                        "O QR Code em anexo é a chave para acessar cada foto, palavra e detalhe que você preparou.\n\n" +
+
+                        "Ficamos muito felizes em ajudar você a transformar sentimentos em uma experiência digital única.\n\n" +
+
+                        "💡 Ideias para surpreender:\n" +
+                        "• Mensagem inesperada: Envie o QR Code por WhatsApp no meio do dia com um \"pensei em você\".\n" +
+                        "• Presente físico: Imprima o código e coloque dentro de uma caixa de bombons ou um envelope bonito.\n" +
+                        "• Surpresa no celular: Use o QR Code como papel de parede por alguns minutos e deixe a pessoa descobrir.\n\n" +
+
+                        "Com carinho,\n" +
+                        "Equipe HeartCode",
                 userName
         );
 
         CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("Rearts <onboarding@resend.dev>")
+                .from("HeartCode <onboarding@resend.dev>")
                 .to(List.of(to))
-                .subject("Sua página personalizada Rearts está pronta!")
+                .subject(subject)
                 .text(body)
                 .attachments(List.of(attachment))
                 .build();
 
         CreateEmailResponse response = resend.emails().send(params);
-        System.out.println("[EMAIL] Enviado com sucesso! id=" + response.getId());
     }
 }
