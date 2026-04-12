@@ -77,9 +77,7 @@ public class PaymentController {
             // Precisa buscar via paymentService ou direto pelo preferenceId do webhook
             // O MP envia o preference_id no payload também
             log.info("[WEBHOOK] Pagamento aprovado! id={}", paymentId);
-            String preferenceId = dataMap.containsKey("preference_id")
-                    ? dataMap.get("preference_id").toString()
-                    : null;
+            String preferenceId = paymentService.getPreferenceIdByPaymentId(paymentId);
 
             log.info("[WEBHOOK] preferenceId={}", preferenceId);
 
