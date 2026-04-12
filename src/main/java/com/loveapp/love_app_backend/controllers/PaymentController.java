@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/payment")
@@ -79,6 +80,17 @@ public class PaymentController {
         }
 
         return ResponseEntity.ok("OK");
+    }
+
+    @PostMapping("/simulate-paid/{pageId}")
+    public ResponseEntity<?> simulatePaid(@PathVariable UUID pageId) throws Exception {
+        Page page = pageService.getById(pageId);
+
+        byte[] qrCode = qrCodeService.generate("https://heartlink-85i3.vercel.app/p/" + page.getSlug());
+        emailService.sendEmailWithQRCode(page.getUser().getEmail(), page.getUser().getUsername(), qrCode);
+        pageService.markAsPaid(page.getId());
+
+        return ResponseEntity.ok("Página marcada como PAGA e e-mail enviado para: " + page.getUser().getEmail());
     }
 
 }
