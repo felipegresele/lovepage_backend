@@ -1,6 +1,5 @@
 package com.loveapp.love_app_backend.services;
 
-import com.loveapp.love_app_backend.controllers.PaymentController;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.preference.*;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PaymentService {
@@ -22,7 +22,7 @@ public class PaymentService {
     @Value("${mercadopago.token}")
     private String token;
 
-    public String createPayment(BigDecimal amount, String title, String notificationUrl) throws Exception {
+    public String createPayment(BigDecimal amount, String title, String notificationUrl, UUID pageId) throws Exception {
 
         MercadoPagoConfig.setAccessToken(token);
 
@@ -36,9 +36,9 @@ public class PaymentService {
 
         PreferenceBackUrlsRequest backUrls =
                 PreferenceBackUrlsRequest.builder()
-                        .success("https://heartlink.com/sucesso")
-                        .failure("https://heartlink.com/erro")
-                        .pending("https://heartlink.com/pendente")
+                        .success("https://heartlink-85i3.vercel.app/sucesso")
+                        .failure("https://heartlink-85i3.vercel.app/erro")
+                        .pending("https://heartlink-85i3.vercel.app/pendente")
                         .build();
 
         PreferenceRequest preferenceRequest =
@@ -46,35 +46,29 @@ public class PaymentService {
                         .items(List.of(item))
                         .backUrls(backUrls)
                         .notificationUrl(notificationUrl)
+                        .externalReference(pageId.toString()) // salva o pageId para recuperar no webhook
                         .build();
 
         PreferenceClient client = new PreferenceClient();
         Preference preference = client.create(preferenceRequest);
 
-        // Retorna tanto o initPoint quanto o preferenceId separados
+        log.info("[PAYMENT] Preferencia criada - id={} externalReference={}", preference.getId(), pageId);
+
         return preference.getInitPoint() + "|" + preference.getId();
     }
 
     public boolean isPaymentApproved(Long paymentId) throws Exception {
         MercadoPagoConfig.setAccessToken(token);
-
         PaymentClient client = new PaymentClient();
         Payment payment = client.get(paymentId);
-
         return "approved".equals(payment.getStatus());
     }
 
-    public String getPreferenceIdByPaymentId(Long paymentId) throws Exception {
+    public String getPageIdByPaymentId(Long paymentId) throws Exception {
         MercadoPagoConfig.setAccessToken(token);
         PaymentClient client = new PaymentClient();
         Payment payment = client.get(paymentId);
-
-        // Loga todos os dados disponíveis para descobrir o campo certo
-        log.info("[PAYMENT] status={}", payment.getStatus());
         log.info("[PAYMENT] externalReference={}", payment.getExternalReference());
-        log.info("[PAYMENT] metadata={}", payment.getMetadata());
-        log.info("[PAYMENT] additionalInfo={}", payment.getAdditionalInfo());
-
-        return null; // temporario
+        return payment.getExternalReference(); // retorna o pageId que salvamos
     }
 }

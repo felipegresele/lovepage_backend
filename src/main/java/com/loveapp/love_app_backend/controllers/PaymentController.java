@@ -6,14 +6,14 @@ import com.loveapp.love_app_backend.services.EmailService;
 import com.loveapp.love_app_backend.services.PageService;
 import com.loveapp.love_app_backend.services.PaymentService;
 import com.loveapp.love_app_backend.services.QRCodeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/payment")
@@ -35,21 +35,22 @@ public class PaymentController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createPayment(@RequestBody CreatePaymentDTO dto) throws Exception {
-
         log.info("[PAYMENT] Criando pagamento - pageId={} planType={}", dto.getPageId(), dto.getPlanType());
 
-        // Pega o valor do plano
         BigDecimal amount = dto.getPlanType().getPrice();
 
-        // Cria o pagamento no Mercado Pago
-        String result = paymentService.createPayment(amount, "Página romântica personalizada", "https://lovepage-backend.onrender.com/api/payment/webhook");
+        // passa o pageId para salvar como externalReference no MP
+        String result = paymentService.createPayment(
+                amount,
+                "Página romântica personalizada",
+                "https://lovepage-backend.onrender.com/api/payment/webhook",
+                dto.getPageId()
+        );
 
-        // result = "initPoint|preferenceId"
         String[] parts = result.split("\\|");
         String initPoint = parts[0];
         String preferenceId = parts[1];
 
-        // Salva o preferenceId na página para acompanhar depois
         pageService.savePaymentId(dto.getPageId(), preferenceId);
         log.info("[PAYMENT] Pagamento criado - preferenceId={}", preferenceId);
 
@@ -68,29 +69,31 @@ public class PaymentController {
             return ResponseEntity.ok("Ignored");
         }
 
-        // O payload vem como: { "data": { "id": "12345" } }
         Map<String, Object> dataMap = (Map<String, Object>) payload.get("data");
         Long paymentId = Long.parseLong(dataMap.get("id").toString());
+        log.info("[WEBHOOK] Verificando pagamento id={}", paymentId);
 
         if (paymentService.isPaymentApproved(paymentId)) {
-            // Busca a página pelo paymentId (preferenceId salvo antes)
-            // Precisa buscar via paymentService ou direto pelo preferenceId do webhook
-            // O MP envia o preference_id no payload também
             log.info("[WEBHOOK] Pagamento aprovado! id={}", paymentId);
-            String preferenceId = paymentService.getPreferenceIdByPaymentId(paymentId);
 
-            log.info("[WEBHOOK] preferenceId={}", preferenceId);
+            // busca o pageId pelo externalReference salvo no MP
+            String pageIdStr = paymentService.getPageIdByPaymentId(paymentId);
+            log.info("[WEBHOOK] pageId recuperado={}", pageIdStr);
 
-            if (preferenceId == null) {
-                log.warn("[WEBHOOK] preference_id nulo no payload!");
-                return ResponseEntity.ok("No preference_id");
+            if (pageIdStr == null) {
+                log.warn("[WEBHOOK] externalReference nulo!");
+                return ResponseEntity.ok("No externalReference");
             }
 
-            Page page = pageService.getByPaymentId(preferenceId);
+            Page page = pageService.getById(UUID.fromString(pageIdStr));
+            log.info("[WEBHOOK] Pagina encontrada - slug={} email={}", page.getSlug(), page.getUser().getEmail());
 
-            byte[] qrCode = qrCodeService.generate("https://heartlink.com/p/" + page.getSlug());
+            byte[] qrCode = qrCodeService.generate("https://heartlink-85i3.vercel.app/p/" + page.getSlug());
             emailService.sendEmailWithQRCode(page.getUser().getEmail(), page.getUser().getUsername(), qrCode);
             pageService.markAsPaid(page.getId());
+            log.info("[WEBHOOK] Pagina marcada como PAGA e email enviado!");
+        } else {
+            log.warn("[WEBHOOK] Pagamento NAO aprovado - id={}", paymentId);
         }
 
         return ResponseEntity.ok("OK");
@@ -118,5 +121,4 @@ public class PaymentController {
             throw e;
         }
     }
-
 }
