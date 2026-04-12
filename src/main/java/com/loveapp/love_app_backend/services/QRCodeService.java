@@ -30,7 +30,7 @@ public class QRCodeService {
     // SURPRESA: QR 300x300 centralizado na área branca (área maior comporta)
     private static final Map<String, int[]> FRAME_QR_BOUNDS = Map.of(
             "ESCANEIE", new int[]{149, 157, 200, 200},
-            "JUNTOS",   new int[]{163, 129, 200, 200},
+            "JUNTOS",   new int[]{180, 150, 200, 200},
             "SPOTIFY",  new int[]{150, 150, 200, 200},
             "SURPRESA", new int[]{ 99, 103, 300, 300}
     );
