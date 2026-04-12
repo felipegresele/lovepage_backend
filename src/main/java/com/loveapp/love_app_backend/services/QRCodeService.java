@@ -3,7 +3,6 @@ package com.loveapp.love_app_backend.services;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.common.BitMatrix;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.loveapp.love_app_backend.modal.types.QrCodeFrame;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -26,12 +25,14 @@ public class QRCodeService {
             "SURPRESA", "static/images/surpresa-para-vc-sem-qr.png"
     );
 
-    // Formato: { x, y, largura, altura } em pixels (imagens 500x500)
+    // Formato: { x, y, largura, altura }
+    // ESCANEIE e JUNTOS: QR 200x200 centralizado na área branca
+    // SURPRESA: QR 300x300 centralizado na área branca (área maior comporta)
     private static final Map<String, int[]> FRAME_QR_BOUNDS = Map.of(
-            "ESCANEIE", new int[]{131, 112, 200, 200},
-            "JUNTOS",   new int[]{150, 150, 200, 200},
+            "ESCANEIE", new int[]{149, 157, 200, 200},
+            "JUNTOS",   new int[]{163, 129, 200, 200},
             "SPOTIFY",  new int[]{150, 150, 200, 200},
-            "SURPRESA", new int[]{150, 100, 200, 200}
+            "SURPRESA", new int[]{ 99, 103, 300, 300}
     );
 
     public byte[] generate(String url) throws Exception {
@@ -52,7 +53,6 @@ public class QRCodeService {
 
         BufferedImage frameImage = ImageIO.read(frameStream);
         if (frameImage == null) {
-            // ImageIO não conseguiu decodificar — retorna QR simples como fallback
             return generate(url);
         }
 
@@ -78,11 +78,20 @@ public class QRCodeService {
         return out.toByteArray();
     }
 
+    // QR vermelho escuro sobre fundo branco
     private byte[] generateQRBytes(String url, int width, int height) throws Exception {
         QRCodeWriter writer = new QRCodeWriter();
         BitMatrix matrix = writer.encode(url, BarcodeFormat.QR_CODE, width, height);
+
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                image.setRGB(x, y, matrix.get(x, y) ? 0xCC0000 : 0xFFFFFF);
+            }
+        }
+
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        MatrixToImageWriter.writeToStream(matrix, "PNG", stream);
+        ImageIO.write(image, "PNG", stream);
         return stream.toByteArray();
     }
 }
