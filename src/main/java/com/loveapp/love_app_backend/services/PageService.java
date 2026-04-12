@@ -5,6 +5,7 @@ import com.loveapp.love_app_backend.modal.User;
 import com.loveapp.love_app_backend.modal.dtos.CreatePageDTO;
 import com.loveapp.love_app_backend.modal.types.PageStatus;
 import com.loveapp.love_app_backend.modal.types.PlanType;
+import com.loveapp.love_app_backend.modal.types.QrCodeFrame;
 import com.loveapp.love_app_backend.repositories.PageRepository;
 import com.loveapp.love_app_backend.repositories.UserRepository;
 import org.springframework.stereotype.Service;
@@ -103,6 +104,13 @@ public class PageService {
     public Page getById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Página não encontrada!"));
+    }
+
+    public void saveQrCodeFrame(UUID pageId, QrCodeFrame qrCodeFrame) {
+        Page page = repository.findById(pageId)
+                .orElseThrow(() -> new RuntimeException("Página não encontrada: " + pageId));
+        page.setQrCodeFrame(qrCodeFrame);
+        repository.save(page);
     }
 
 }

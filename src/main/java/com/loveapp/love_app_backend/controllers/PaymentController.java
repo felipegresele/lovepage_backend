@@ -37,12 +37,15 @@ public class PaymentController {
     public ResponseEntity<?> createPayment(@RequestBody CreatePaymentDTO dto) throws Exception {
         log.info("[PAYMENT] Criando pagamento - pageId={} planType={}", dto.getPageId(), dto.getPlanType());
 
-        BigDecimal amount = dto.getPlanType().getPrice();
+        //Usa o valor total calculado no front, se nao vier usa o valor do plano escolhido
+        BigDecimal amount = dto.getTotalAmount() != null ? dto.getTotalAmount() : dto.getPlanType().getPrice();
+
+        pageService.saveQrCodeFrame(dto.getPageId(), dto.getQrCodeFrame());
 
         // passa o pageId para salvar como externalReference no MP
         String result = paymentService.createPayment(
                 amount,
-                "Página romântica personalizada",
+                "Página romântica personalizada - HeartCode",
                 "https://lovepage-backend.onrender.com/api/payment/webhook",
                 dto.getPageId()
         );
@@ -88,7 +91,10 @@ public class PaymentController {
             Page page = pageService.getById(UUID.fromString(pageIdStr));
             log.info("[WEBHOOK] Pagina encontrada - slug={} email={}", page.getSlug(), page.getUser().getEmail());
 
-            byte[] qrCode = qrCodeService.generate("https://heartlink-85i3.vercel.app/p/" + page.getSlug());
+            //Gera o QR Code e aplica a moldura se tiver
+            String pageUrl = "https://heartlink-85i3.vercel.app/p/" + page.getSlug();
+            byte[] qrCode = qrCodeService.generateWithFrame(pageUrl, page.getQrCodeFrame());
+
             emailService.sendEmailWithQRCode(page.getUser().getEmail(), page.getUser().getUsername(), qrCode);
             pageService.markAsPaid(page.getId());
             log.info("[WEBHOOK] Pagina marcada como PAGA e email enviado!");
@@ -106,7 +112,8 @@ public class PaymentController {
             Page page = pageService.getById(pageId);
             log.info("[SIMULATE] Pagina encontrada - slug={} email={}", page.getSlug(), page.getUser().getEmail());
 
-            byte[] qrCode = qrCodeService.generate("https://heartlink-85i3.vercel.app/p/" + page.getSlug());
+            String pageUrl = "https://heartlink-85i3.vercel.app/p/" + page.getSlug();
+            byte[] qrCode = qrCodeService.generateWithFrame(pageUrl, page.getQrCodeFrame());
             log.info("[SIMULATE] QR code gerado");
 
             emailService.sendEmailWithQRCode(page.getUser().getEmail(), page.getUser().getUsername(), qrCode);

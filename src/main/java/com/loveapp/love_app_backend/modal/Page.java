@@ -3,6 +3,7 @@ package com.loveapp.love_app_backend.modal;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.loveapp.love_app_backend.modal.types.PageStatus;
 import com.loveapp.love_app_backend.modal.types.PlanType;
+import com.loveapp.love_app_backend.modal.types.QrCodeFrame;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -55,6 +56,9 @@ public class Page {
     private LocalDateTime createdAt;
 
     private String paymentId;
+
+    @Enumerated(EnumType.STRING)
+    private QrCodeFrame qrCodeFrame;
 
     @ElementCollection
     @CollectionTable(name = "page_photos", joinColumns = @JoinColumn(name = "page_id"))
