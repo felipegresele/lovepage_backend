@@ -20,14 +20,13 @@ import java.util.Map;
 public class QRCodeService {
 
     private static final Map<String, String> FRAME_PATHS = Map.of(
-            "ESCANEIE", "static/images/escaneie-e-se-surprenda-sem-qr.jpg",
-            "JUNTOS",   "static/images/juntos-para-sempre-sem-qr.jpg",
-            "SPOTIFY",  "static/images/spotify-sem-qr.jpg",
-            "SURPRESA", "static/images/surpresa-para-vc-sem-qr.jpg"
+            "ESCANEIE", "static/images/escaneie-e-se-surprenda-sem-qr.png",
+            "JUNTOS",   "static/images/juntos-para-sempre-sem-qr.png",
+            "SPOTIFY",  "static/images/spotify-sem-qr.png",
+            "SURPRESA", "static/images/surpresa-para-vc-sem-qr.png"
     );
 
-    // TODO: substitua x e y pelas coordenadas reais de cada moldura
-    // Formato: { x, y, largura, altura } — largura e altura sempre 200x200
+    // Formato: { x, y, largura, altura } em pixels (imagens 500x500)
     private static final Map<String, int[]> FRAME_QR_BOUNDS = Map.of(
             "ESCANEIE", new int[]{131, 112, 200, 200},
             "JUNTOS",   new int[]{150, 150, 200, 200},
@@ -48,11 +47,15 @@ public class QRCodeService {
         try {
             frameStream = new ClassPathResource(FRAME_PATHS.get(frame.name())).getInputStream();
         } catch (Exception e) {
-            // arquivo não encontrado, retorna QR simples
             return generate(url);
         }
 
         BufferedImage frameImage = ImageIO.read(frameStream);
+        if (frameImage == null) {
+            // ImageIO não conseguiu decodificar — retorna QR simples como fallback
+            return generate(url);
+        }
+
         int[] bounds = FRAME_QR_BOUNDS.get(frame.name());
 
         byte[] qrBytes = generateQRBytes(url, bounds[2], bounds[3]);
