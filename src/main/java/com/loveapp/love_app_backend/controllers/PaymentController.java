@@ -35,7 +35,7 @@ public class PaymentController {
         BigDecimal amount = dto.getPlanType().getPrice();
 
         // Cria o pagamento no Mercado Pago
-        String result = paymentService.createPayment(amount, "Página romântica personalizada", "https://heartlink.com/api/payment/webhook");
+        String result = paymentService.createPayment(amount, "Página romântica personalizada", "https://lovepage-backend.onrender.com/api/payment/webhook");
 
         // result = "initPoint|preferenceId"
         String[] parts = result.split("\\|");
