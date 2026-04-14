@@ -1,6 +1,8 @@
 package com.loveapp.love_app_backend.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.loveapp.love_app_backend.modal.Page;
+import com.loveapp.love_app_backend.modal.Retrospectiva;
 import com.loveapp.love_app_backend.modal.User;
 import com.loveapp.love_app_backend.modal.dtos.CreatePageDTO;
 import com.loveapp.love_app_backend.modal.types.PageStatus;
@@ -8,6 +10,7 @@ import com.loveapp.love_app_backend.modal.types.PlanType;
 import com.loveapp.love_app_backend.modal.types.QrCodeFrame;
 import com.loveapp.love_app_backend.repositories.PageRepository;
 import com.loveapp.love_app_backend.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -110,6 +113,13 @@ public class PageService {
         Page page = repository.findById(pageId)
                 .orElseThrow(() -> new RuntimeException("Página não encontrada: " + pageId));
         page.setQrCodeFrame(qrCodeFrame);
+        repository.save(page);
+    }
+
+    public void salvarRetrospectiva(UUID pageId, Retrospectiva retrospectiva) {
+        Page page = repository.findById(pageId)
+                .orElseThrow(() -> new RuntimeException("Página não encontrada: " + pageId));
+        page.setRetrospectiva(retrospectiva);
         repository.save(page);
     }
 

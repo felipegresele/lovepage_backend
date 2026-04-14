@@ -1,8 +1,11 @@
 package com.loveapp.love_app_backend.controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.loveapp.love_app_backend.modal.Page;
 import com.loveapp.love_app_backend.modal.User;
 import com.loveapp.love_app_backend.modal.dtos.CreatePageDTO;
+import com.loveapp.love_app_backend.modal.dtos.SalvarRetrospectiveDTO;
+import com.loveapp.love_app_backend.modal.dtos.UpdateRetrospectiveDTO;
 import com.loveapp.love_app_backend.services.EmailService;
 import com.loveapp.love_app_backend.services.PageService;
 import com.loveapp.love_app_backend.services.QRCodeService;
@@ -66,6 +69,16 @@ public class PageController {
             return ResponseEntity.ok("Email com QR code enviado para: " + page.getUser().getEmail());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Erro: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/retrospectiva")
+    public ResponseEntity<?> salvarRetrospectiva(@RequestBody SalvarRetrospectiveDTO dto) {
+        try {
+            service.salvarRetrospectiva(dto.getPageId(), dto.getRetrospectiva());
+            return ResponseEntity.ok("Retrospectiva salva com sucesso!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
         }
     }
 

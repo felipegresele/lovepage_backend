@@ -1,11 +1,15 @@
 package com.loveapp.love_app_backend.modal;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.loveapp.love_app_backend.modal.types.PageStatus;
 import com.loveapp.love_app_backend.modal.types.PlanType;
 import com.loveapp.love_app_backend.modal.types.QrCodeFrame;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -64,5 +68,9 @@ public class Page {
     @CollectionTable(name = "page_photos", joinColumns = @JoinColumn(name = "page_id"))
     @Column(name = "photo_url")
     private List<String> photos;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private Retrospectiva retrospectiva;
 
 }

@@ -1,0 +1,1 @@
+ALTER TABLE love_pages ADD COLUMN IF NOT EXISTS retrospective JSONB;
