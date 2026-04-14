@@ -22,7 +22,8 @@ public class QRCodeService {
             "ESCANEIE", "static/images/escaneie-e-se-surprenda-sem-qr.png",
             "JUNTOS",   "static/images/juntos-para-sempre-sem-qr.png",
             "SPOTIFY",  "static/images/spotify-sem-qr.png",
-            "SURPRESA", "static/images/surpresa-para-vc-sem-qr.png"
+            "SURPRESA", "static/images/surpresa-para-vc-sem-qr.png",
+            "CARTA", "static/images/carta-sem-qr.png"
     );
 
     // Formato: { x, y, largura, altura }
@@ -32,7 +33,8 @@ public class QRCodeService {
             "ESCANEIE", new int[]{149, 157, 200, 200},
             "JUNTOS",   new int[]{180, 150, 200, 200},
             "SPOTIFY",  new int[]{150, 150, 200, 200},
-            "SURPRESA", new int[]{ 99, 103, 300, 300}
+            "SURPRESA", new int[]{ 99, 103, 300, 300},
+            "CARTA", new int[]{ 99, 103, 300, 300}
     );
 
     public byte[] generate(String url) throws Exception {
