@@ -5,5 +5,6 @@ public enum QrCodeFrame {
     ESCANEIE,
     JUNTOS,
     SPOTIFY,
-    SURPRESA
+    SURPRESA,
+    CARTA
 }
