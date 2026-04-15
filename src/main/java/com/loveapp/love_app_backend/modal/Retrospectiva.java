@@ -12,6 +12,7 @@ public class Retrospectiva {
     private List<WheelItem>    wheel;
     private List<GalleryItem>  gallery;
     private List<EnigmaItem>   enigma;
+    private Boolean efeitoTime = false;
 
     // ── Getters / Setters ────────────────────────────────────────────────────
 
@@ -29,4 +30,10 @@ public class Retrospectiva {
 
     public List<EnigmaItem> getEnigma() { return enigma; }
     public void setEnigma(List<EnigmaItem> enigma) { this.enigma = enigma; }
+
+    public boolean isEfeitoTime() {return efeitoTime;}
+    public void setEfeitoTime(boolean efeitoTime) {
+        this.efeitoTime = efeitoTime;
+    }
+
 }
