@@ -5,6 +5,7 @@ import com.loveapp.love_app_backend.modal.Page;
 import com.loveapp.love_app_backend.modal.User;
 import com.loveapp.love_app_backend.modal.dtos.CreatePageDTO;
 import com.loveapp.love_app_backend.modal.dtos.SalvarRetrospectiveDTO;
+import com.loveapp.love_app_backend.modal.dtos.UpdatePageDTO;
 import com.loveapp.love_app_backend.modal.dtos.UpdateRetrospectiveDTO;
 import com.loveapp.love_app_backend.services.EmailService;
 import com.loveapp.love_app_backend.services.PageService;
@@ -77,6 +78,27 @@ public class PageController {
         try {
             service.salvarRetrospectiva(dto.getPageId(), dto.getRetrospectiva());
             return ResponseEntity.ok("Retrospectiva salva com sucesso!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Page>> getPagesByUsewr(@PathVariable UUID userId) {
+        List<Page> pages = service.getPagesByUserId(userId);
+        return ResponseEntity.ok(pages);
+    }
+
+    @PutMapping("/{pageId}")
+    public ResponseEntity<?> updatePage(
+            @PathVariable UUID pageId,
+            @RequestBody UpdatePageDTO dto) {
+        try {
+            Page updated = service.updatePage(pageId, dto);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            // Campo inválido (ex: tentativa de adicionar retrospectiva inexistente)
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(e.getMessage());
         }

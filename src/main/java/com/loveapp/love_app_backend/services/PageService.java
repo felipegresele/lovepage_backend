@@ -5,6 +5,7 @@ import com.loveapp.love_app_backend.modal.Page;
 import com.loveapp.love_app_backend.modal.Retrospectiva;
 import com.loveapp.love_app_backend.modal.User;
 import com.loveapp.love_app_backend.modal.dtos.CreatePageDTO;
+import com.loveapp.love_app_backend.modal.dtos.UpdatePageDTO;
 import com.loveapp.love_app_backend.modal.types.PageStatus;
 import com.loveapp.love_app_backend.modal.types.PlanType;
 import com.loveapp.love_app_backend.modal.types.QrCodeFrame;
@@ -121,6 +122,86 @@ public class PageService {
                 .orElseThrow(() -> new RuntimeException("Página não encontrada: " + pageId));
         page.setRetrospectiva(retrospectiva);
         repository.save(page);
+    }
+
+    public List<Page> getPagesByUserId(UUID userId) {
+        // Valida se o usuário existe antes de buscar
+        userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado: " + userId));
+
+        return repository.findByUserId(userId);
+    }
+
+    @Transactional
+    public Page updatePage(UUID pageId, UpdatePageDTO dto) {
+        Page page = repository.findById(pageId)
+                .orElseThrow(() -> new RuntimeException("Página não encontrada: " + pageId));
+
+        // ── Campos simples: só sobrescreve se o DTO trouxer valor ──────────────
+        if (dto.getReceiverName() != null) {
+            page.setReceiverName(dto.getReceiverName());
+        }
+        if (dto.getSenderName() != null) {
+            page.setSenderName(dto.getSenderName());
+        }
+        if (dto.getMessage() != null) {
+            page.setMessage(dto.getMessage());
+        }
+        if (dto.getRelationshipStartDate() != null) {
+            page.setRelationshipStartDate(dto.getRelationshipStartDate());
+        }
+        if (dto.getMusicId() != null) {
+            page.setMusicId(dto.getMusicId());
+        }
+        if (dto.getMusicTitle() != null) {
+            page.setMusicTitle(dto.getMusicTitle());
+        }
+        if (dto.getTheme() != null) {
+            page.setTheme(dto.getTheme());
+        }
+        if (dto.getPhotos() != null) {
+            page.setPhotos(dto.getPhotos());
+        }
+
+        // ── Retrospectiva: BLOQUEADA se não existia na criação ─────────────────
+        if (dto.getRetrospectiva() != null) {
+            if (page.getRetrospectiva() == null) {
+                throw new IllegalArgumentException(
+                        "Não é permitido adicionar retrospectiva durante a edição. " +
+                                "Essa funcionalidade não foi incluída na criação desta página."
+                );
+            }
+            // Existe no original → atualiza apenas as seções que existiam
+            page.setRetrospectiva(
+                    mergeRetrospectiva(page.getRetrospectiva(), dto.getRetrospectiva())
+            );
+        }
+
+        return repository.save(page);
+    }
+
+    /**
+     * Merge seguro de Retrospectiva: só atualiza sub-seções que já existiam
+     * na entidade original. Garante que o usuário não adiciona seções novas.
+     */
+    private Retrospectiva mergeRetrospectiva(Retrospectiva original, Retrospectiva incoming) {
+        // selectedSections define o contrato do que o usuário criou
+        if (incoming.getTimeline() != null && original.getTimeline() != null) {
+            original.setTimeline(incoming.getTimeline());
+        }
+        if (incoming.getWheel() != null && original.getWheel() != null) {
+            original.setWheel(incoming.getWheel());
+        }
+        if (incoming.getGallery() != null && original.getGallery() != null) {
+            original.setGallery(incoming.getGallery());
+        }
+        if (incoming.getEnigma() != null && original.getEnigma() != null) {
+            original.setEnigma(incoming.getEnigma());
+        }
+        // efeitoTime é sempre editável se retrospectiva existe
+        original.setEfeitoTime(incoming.isEfeitoTime());
+
+        return original;
     }
 
 }

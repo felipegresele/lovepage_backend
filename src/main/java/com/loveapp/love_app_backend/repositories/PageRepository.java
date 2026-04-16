@@ -19,4 +19,6 @@ public interface PageRepository extends JpaRepository<Page, UUID> {
 
     Optional<Page> findByPaymentId(String paymentId);
 
+    List<Page> findByUserId(UUID userId);
+
 }
