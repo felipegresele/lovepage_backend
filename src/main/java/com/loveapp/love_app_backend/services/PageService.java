@@ -30,12 +30,13 @@ public class PageService {
         this.userRepository = userRepository;
     }
 
+    // ── Métodos existentes ────────────────────────────────────────────────────
+
     public List<Page> getAllPages() {
         return repository.findAll();
     }
 
-    public Page createDraft(CreatePageDTO dto){
-
+    public Page createDraft(CreatePageDTO dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
 
@@ -51,8 +52,8 @@ public class PageService {
                 .theme(dto.getTheme())
                 .relationshipStartDate(dto.getRelationshipStartDate())
                 .photos(dto.getPhotos())
-                .planType(planType) // salvar o plano selecionado
-                .slug(UUID.randomUUID().toString().substring(0,6))
+                .planType(planType)
+                .slug(UUID.randomUUID().toString().substring(0, 6))
                 .status(PageStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -67,33 +68,27 @@ public class PageService {
     }
 
     public void deleteExpiredPages() {
-        // Busca todas as páginas normais
         List<Page> normalPages = repository.findByPlanType(PlanType.PADRAO);
-
         for (Page page : normalPages) {
-            // Verifica se já passou 24 horas
             if (Duration.between(page.getCreatedAt(), LocalDateTime.now()).toHours() >= 24) {
                 repository.delete(page);
             }
         }
     }
 
-    // Salva o preferenceId (checkout) na página
     public void savePaymentId(UUID pageId, String preferenceId) {
         Page page = repository.findById(pageId)
                 .orElseThrow(() -> new RuntimeException("Página não encontrada!"));
-        page.setStatus(PageStatus.PENDING); // status enquanto pagamento não confirmado
-        page.setPaymentId(preferenceId); // você precisa criar este campo no Page
+        page.setStatus(PageStatus.PENDING);
+        page.setPaymentId(preferenceId);
         repository.save(page);
     }
 
-    // Busca página pelo preferenceId
     public Page getByPaymentId(String preferenceId) {
         return repository.findByPaymentId(preferenceId)
                 .orElseThrow(() -> new RuntimeException("Página não encontrada pelo pagamento!"));
     }
 
-    // Marca a página como paga
     public void markAsPaid(UUID pageId) {
         Page page = repository.findById(pageId)
                 .orElseThrow(() -> new RuntimeException("Página não encontrada!"));
@@ -101,7 +96,7 @@ public class PageService {
         repository.save(page);
     }
 
-    public Page getBySlug(String slug){
+    public Page getBySlug(String slug) {
         return repository.findBySlug(slug).orElseThrow();
     }
 
@@ -124,6 +119,11 @@ public class PageService {
         repository.save(page);
     }
 
+    // ── NOVOS métodos ─────────────────────────────────────────────────────────
+
+    /**
+     * Retorna todas as páginas de um usuário, inclusive sem páginas (lista vazia).
+     */
     public List<Page> getPagesByUserId(UUID userId) {
         // Valida se o usuário existe antes de buscar
         userRepository.findById(userId)
@@ -132,6 +132,13 @@ public class PageService {
         return repository.findByUserId(userId);
     }
 
+    /**
+     * Atualiza apenas os campos não-nulos do DTO.
+     *
+     * REGRA DE OURO: se um campo era nulo na entidade original (ex: retrospectiva),
+     * o DTO NÃO pode introduzi-lo. A tentativa resulta em IllegalArgumentException
+     * que o Controller converte em HTTP 400.
+     */
     @Transactional
     public Page updatePage(UUID pageId, UpdatePageDTO dto) {
         Page page = repository.findById(pageId)
@@ -203,5 +210,4 @@ public class PageService {
 
         return original;
     }
-
 }

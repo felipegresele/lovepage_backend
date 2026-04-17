@@ -84,7 +84,7 @@ public class PageController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Page>> getPagesByUsewr(@PathVariable UUID userId) {
+    public ResponseEntity<List<Page>> getPagesByUser(@PathVariable UUID userId) {
         List<Page> pages = service.getPagesByUserId(userId);
         return ResponseEntity.ok(pages);
     }
@@ -103,5 +103,4 @@ public class PageController {
             return ResponseEntity.status(404).body(e.getMessage());
         }
     }
-
 }
