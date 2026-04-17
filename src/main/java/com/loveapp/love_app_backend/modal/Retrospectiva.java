@@ -14,6 +14,10 @@ public class Retrospectiva {
     private List<EnigmaItem>   enigma;
     private Boolean efeitoTime = false;
 
+    private String ondeSeConheceram;
+    private String momentoFavorito;
+    private String proximoPasso;
+
     // ── Getters / Setters ────────────────────────────────────────────────────
 
     public List<String> getSelectedSections() { return selectedSections; }
@@ -35,5 +39,14 @@ public class Retrospectiva {
     public void setEfeitoTime(boolean efeitoTime) {
         this.efeitoTime = efeitoTime;
     }
+
+    public String getOndeSeConheceram() { return ondeSeConheceram; }
+    public void setOndeSeConheceram(String ondeSeConheceram) { this.ondeSeConheceram = ondeSeConheceram; }
+
+    public String getMomentoFavorito() { return momentoFavorito; }
+    public void setMomentoFavorito(String momentoFavorito) { this.momentoFavorito = momentoFavorito; }
+
+    public String getProximoPasso() { return proximoPasso; }
+    public void setProximoPasso(String proximoPasso) { this.proximoPasso = proximoPasso; }
 
 }

@@ -208,6 +208,17 @@ public class PageService {
         // efeitoTime é sempre editável se retrospectiva existe
         original.setEfeitoTime(incoming.isEfeitoTime());
 
+        // ── Campos opcionais de memórias: sempre editáveis (podem ser nulos) ──
+        if (incoming.getOndeSeConheceram() != null) {
+            original.setOndeSeConheceram(incoming.getOndeSeConheceram());
+        }
+        if (incoming.getMomentoFavorito() != null) {
+            original.setMomentoFavorito(incoming.getMomentoFavorito());
+        }
+        if (incoming.getProximoPasso() != null) {
+            original.setProximoPasso(incoming.getProximoPasso());
+        }
+
         return original;
     }
 }
