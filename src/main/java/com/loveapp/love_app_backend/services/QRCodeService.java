@@ -34,7 +34,7 @@ public class QRCodeService {
             "JUNTOS",   new int[]{180, 150, 200, 200},
             "SPOTIFY",  new int[]{150, 150, 200, 200},
             "SURPRESA", new int[]{ 99, 103, 300, 300},
-            "CARTA", new int[]{ 99, 103, 300, 300}
+            "CARTA", new int[]{ 140, 150, 200, 200}
     );
 
     public byte[] generate(String url) throws Exception {
