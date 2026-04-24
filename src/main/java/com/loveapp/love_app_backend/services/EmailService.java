@@ -51,7 +51,7 @@ public class EmailService {
         );
 
         CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("HeartCode <onboarding@resend.dev>")
+                .from("Equipe HeartCode <noreply@heartcodegift.com.br>")
                 .to(List.of(to))
                 .subject(subject)
                 .text(body)
