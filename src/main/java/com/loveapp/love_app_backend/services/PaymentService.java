@@ -36,17 +36,35 @@ public class PaymentService {
 
         PreferenceBackUrlsRequest backUrls =
                 PreferenceBackUrlsRequest.builder()
-                        .success("https://heartlink-85i3.vercel.app/sucesso")
-                        .failure("https://heartlink-85i3.vercel.app/erro")
-                        .pending("https://heartlink-85i3.vercel.app/pendente")
+                        .success("https://www.heartcodegift.com.br/sucesso")
+                        .failure("https://www.heartcodegift.com.br/erro")
+                        .pending("https://www.heartcodegift.com.br/pendente")
+                        .build();
+
+        PreferencePaymentTypeRequest debitCard =
+                PreferencePaymentTypeRequest.builder()
+                        .id("debit_card")
+                        .build();
+
+        PreferencePaymentTypeRequest prepaidCard =
+                PreferencePaymentTypeRequest.builder()
+                        .id("prepaid_card")
+                        .build();
+
+        PreferencePaymentMethodsRequest paymentMethods =
+                PreferencePaymentMethodsRequest.builder()
+                        .excludedPaymentTypes(List.of(debitCard, prepaidCard))
+                        .installments(1)
                         .build();
 
         PreferenceRequest preferenceRequest =
                 PreferenceRequest.builder()
                         .items(List.of(item))
                         .backUrls(backUrls)
+                        .autoReturn("approved")
                         .notificationUrl(notificationUrl)
-                        .externalReference(pageId.toString()) // salva o pageId para recuperar no webhook
+                        .externalReference(pageId.toString())
+                        .paymentMethods(paymentMethods)
                         .build();
 
         PreferenceClient client = new PreferenceClient();
@@ -69,6 +87,6 @@ public class PaymentService {
         PaymentClient client = new PaymentClient();
         Payment payment = client.get(paymentId);
         log.info("[PAYMENT] externalReference={}", payment.getExternalReference());
-        return payment.getExternalReference(); // retorna o pageId que salvamos
+        return payment.getExternalReference();
     }
 }
