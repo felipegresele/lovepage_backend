@@ -43,8 +43,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(claims.getSubject(), null, List.of());
             SecurityContextHolder.getContext().setAuthentication(auth);
-        } catch (JwtException e) {
+        } catch (JwtException | IllegalArgumentException e) {
+            // Captura JwtException E IllegalArgumentException (token nulo/vazio/malformado)
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Token inválido ou expirado\"}");
             return;
         }
