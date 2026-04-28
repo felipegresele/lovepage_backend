@@ -2,6 +2,7 @@ package com.loveapp.love_app_backend.controllers;
 
 import com.loveapp.love_app_backend.modal.Page;
 import com.loveapp.love_app_backend.modal.dtos.CreatePaymentDTO;
+import com.loveapp.love_app_backend.modal.dtos.PixPaymentResponseDTO;
 import com.loveapp.love_app_backend.services.EmailService;
 import com.loveapp.love_app_backend.services.PageService;
 import com.loveapp.love_app_backend.services.PaymentService;
@@ -30,7 +31,6 @@ public class PaymentController {
     private final QRCodeService qrCodeService;
     private final EmailService emailService;
 
-    // Chave secreta do webhook MP — configure no Render como MERCADOPAGO_WEBHOOK_SECRET
     @Value("${mercadopago.webhook-secret}")
     private String webhookSecret;
 
@@ -42,10 +42,13 @@ public class PaymentController {
         this.emailService = emailService;
     }
 
-    // Protegida por JWT (via SecurityConfig)
+    // ─────────────────────────────────────────────────────────────────
+    // Cartão / Boleto — via Preference (fluxo original, mantido)
+    // ─────────────────────────────────────────────────────────────────
+
     @PostMapping("/create")
     public ResponseEntity<?> createPayment(@RequestBody CreatePaymentDTO dto) throws Exception {
-        log.info("[PAYMENT] Criando pagamento - pageId={} planType={}", dto.getPageId(), dto.getPlanType());
+        log.info("[PAYMENT] Criando pagamento cartao/boleto - pageId={} planType={}", dto.getPageId(), dto.getPlanType());
 
         BigDecimal amount = dto.getTotalAmount() != null ? dto.getTotalAmount() : dto.getPlanType().getPrice();
 
@@ -68,7 +71,49 @@ public class PaymentController {
         return ResponseEntity.ok(initPoint);
     }
 
-    // Público — chamado pelo Mercado Pago, mas com validação de assinatura HMAC
+    // ─────────────────────────────────────────────────────────────────
+    // PIX — cria pagamento e retorna QR Code imediatamente
+    // ─────────────────────────────────────────────────────────────────
+
+    /**
+     * Cria um pagamento PIX e retorna { paymentId, qrCode, qrCodeBase64, status }.
+     * O frontend usa paymentId para fazer polling em /pix/status/{paymentId}.
+     */
+    @PostMapping("/pix/create")
+    public ResponseEntity<?> createPixPayment(@RequestBody CreatePaymentDTO dto) throws Exception {
+        log.info("[PIX] Criando pagamento PIX - pageId={}", dto.getPageId());
+
+        BigDecimal amount = dto.getTotalAmount() != null ? dto.getTotalAmount() : dto.getPlanType().getPrice();
+
+        // Salva o frame escolhido (mesma lógica do fluxo de cartão)
+        pageService.saveQrCodeFrame(dto.getPageId(), dto.getQrCodeFrame());
+
+        // Pega o email do usuário dono da página para informar ao MP (campo obrigatório)
+        Page page = pageService.getById(dto.getPageId());
+        String payerEmail = page.getUser().getEmail();
+
+        PixPaymentResponseDTO response = paymentService.createPixPayment(amount, payerEmail, dto.getPageId());
+
+        log.info("[PIX] Pagamento criado - id={}", response.getPaymentId());
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Polling de status do PIX. O frontend chama a cada 3 segundos.
+     * Retorna { status: "pending" | "approved" | "rejected" | "cancelled" }
+     */
+    @GetMapping("/pix/status/{paymentId}")
+    public ResponseEntity<?> getPixStatus(@PathVariable Long paymentId) throws Exception {
+        String status = paymentService.getPixPaymentStatus(paymentId);
+        log.info("[PIX] Status consultado - paymentId={} status={}", paymentId, status);
+        return ResponseEntity.ok(Map.of("status", status));
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // Webhook — único para PIX e cartão/boleto
+    // ─────────────────────────────────────────────────────────────────
+
     @PostMapping("/webhook")
     public ResponseEntity<?> paymentWebhook(
             @RequestParam(value = "type", required = false) String type,
@@ -79,7 +124,6 @@ public class PaymentController {
 
         log.info("[WEBHOOK] Recebido - type={}", type);
 
-        // Valida assinatura HMAC antes de processar qualquer coisa
         if (!isValidSignature(xSignature, xRequestId, dataId)) {
             log.warn("[WEBHOOK] Assinatura inválida! Possível requisição falsa.");
             return ResponseEntity.status(401).body("Unauthorized");
@@ -121,14 +165,16 @@ public class PaymentController {
         return ResponseEntity.ok("OK");
     }
 
-    // Valida assinatura HMAC-SHA256 conforme documentação do Mercado Pago
+    // ─────────────────────────────────────────────────────────────────
+    // Validação HMAC — igual ao original
+    // ─────────────────────────────────────────────────────────────────
+
     private boolean isValidSignature(String xSignature, String xRequestId, String dataId) {
         if (xSignature == null || webhookSecret == null || webhookSecret.isBlank()) {
             return false;
         }
 
         try {
-            // Extrai ts e v1 do header x-signature
             String ts = null;
             String v1 = null;
             for (String part : xSignature.split(",")) {
@@ -141,7 +187,6 @@ public class PaymentController {
 
             if (ts == null || v1 == null) return false;
 
-            // Monta o template conforme documentação MP
             String manifest = "id:" + dataId + ";request-id:" + xRequestId + ";ts:" + ts + ";";
 
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -155,6 +200,4 @@ public class PaymentController {
             return false;
         }
     }
-
-    // ❌ simulate-paid REMOVIDO — era uma brecha crítica de segurança
 }
