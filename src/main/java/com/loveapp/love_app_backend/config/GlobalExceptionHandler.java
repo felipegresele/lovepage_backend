@@ -1,5 +1,6 @@
 package com.loveapp.love_app_backend.config;
 
+import com.mercadopago.exceptions.MPApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,19 @@ public class GlobalExceptionHandler {
         log.warn("[ERROR] {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", ex.getMessage()));
+    }
+
+    // ✅ NOVO — captura erros do Mercado Pago e loga o conteúdo real
+    @ExceptionHandler(MPApiException.class)
+    public ResponseEntity<?> handleMPApiException(MPApiException ex) {
+        log.error("[MP ERROR] status={} content={}",
+                ex.getStatusCode(),
+                ex.getApiResponse() != null ? ex.getApiResponse().getContent() : "sem response");
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(Map.of(
+                        "error", "Erro ao processar pagamento no Mercado Pago",
+                        "detalhe", ex.getApiResponse() != null ? ex.getApiResponse().getContent() : ex.getMessage()
+                ));
     }
 
     // Erros inesperados → 500 genérico, sem stack trace para o cliente
