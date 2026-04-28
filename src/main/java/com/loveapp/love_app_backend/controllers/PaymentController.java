@@ -8,10 +8,14 @@ import com.loveapp.love_app_backend.services.PaymentService;
 import com.loveapp.love_app_backend.services.QRCodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
+import java.util.HexFormat;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,23 +30,27 @@ public class PaymentController {
     private final QRCodeService qrCodeService;
     private final EmailService emailService;
 
-    public PaymentController(PaymentService paymentService, PageService pageService, QRCodeService qrCodeService, EmailService emailService) {
+    // Chave secreta do webhook MP — configure no Render como MERCADOPAGO_WEBHOOK_SECRET
+    @Value("${mercadopago.webhook-secret}")
+    private String webhookSecret;
+
+    public PaymentController(PaymentService paymentService, PageService pageService,
+                             QRCodeService qrCodeService, EmailService emailService) {
         this.paymentService = paymentService;
         this.pageService = pageService;
         this.qrCodeService = qrCodeService;
         this.emailService = emailService;
     }
 
+    // Protegida por JWT (via SecurityConfig)
     @PostMapping("/create")
     public ResponseEntity<?> createPayment(@RequestBody CreatePaymentDTO dto) throws Exception {
         log.info("[PAYMENT] Criando pagamento - pageId={} planType={}", dto.getPageId(), dto.getPlanType());
 
-        //Usa o valor total calculado no front, se nao vier usa o valor do plano escolhido
         BigDecimal amount = dto.getTotalAmount() != null ? dto.getTotalAmount() : dto.getPlanType().getPrice();
 
         pageService.saveQrCodeFrame(dto.getPageId(), dto.getQrCodeFrame());
 
-        // passa o pageId para salvar como externalReference no MP
         String result = paymentService.createPayment(
                 amount,
                 "Página romântica personalizada - HeartCode",
@@ -60,12 +68,22 @@ public class PaymentController {
         return ResponseEntity.ok(initPoint);
     }
 
+    // Público — chamado pelo Mercado Pago, mas com validação de assinatura HMAC
     @PostMapping("/webhook")
     public ResponseEntity<?> paymentWebhook(
             @RequestParam(value = "type", required = false) String type,
+            @RequestHeader(value = "x-signature", required = false) String xSignature,
+            @RequestHeader(value = "x-request-id", required = false) String xRequestId,
+            @RequestParam(value = "data.id", required = false) String dataId,
             @RequestBody Map<String, Object> payload) throws Exception {
 
-        log.info("[WEBHOOK] Recebido - type={} payload={}", type, payload);
+        log.info("[WEBHOOK] Recebido - type={}", type);
+
+        // Valida assinatura HMAC antes de processar qualquer coisa
+        if (!isValidSignature(xSignature, xRequestId, dataId)) {
+            log.warn("[WEBHOOK] Assinatura inválida! Possível requisição falsa.");
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
 
         if (!"payment".equals(type)) {
             log.info("[WEBHOOK] Tipo ignorado: {}", type);
@@ -79,7 +97,6 @@ public class PaymentController {
         if (paymentService.isPaymentApproved(paymentId)) {
             log.info("[WEBHOOK] Pagamento aprovado! id={}", paymentId);
 
-            // busca o pageId pelo externalReference salvo no MP
             String pageIdStr = paymentService.getPageIdByPaymentId(paymentId);
             log.info("[WEBHOOK] pageId recuperado={}", pageIdStr);
 
@@ -91,7 +108,6 @@ public class PaymentController {
             Page page = pageService.getById(UUID.fromString(pageIdStr));
             log.info("[WEBHOOK] Pagina encontrada - slug={} email={}", page.getSlug(), page.getUser().getEmail());
 
-            //Gera o QR Code e aplica a moldura se tiver
             String pageUrl = "https://heartlink-85i3.vercel.app/p/" + page.getSlug();
             byte[] qrCode = qrCodeService.generateWithFrame(pageUrl, page.getQrCodeFrame());
 
@@ -105,27 +121,40 @@ public class PaymentController {
         return ResponseEntity.ok("OK");
     }
 
-    @PostMapping("/simulate-paid/{pageId}")
-    public ResponseEntity<?> simulatePaid(@PathVariable UUID pageId) throws Exception {
-        log.info("[SIMULATE] Iniciando simulacao para pageId={}", pageId);
+    // Valida assinatura HMAC-SHA256 conforme documentação do Mercado Pago
+    private boolean isValidSignature(String xSignature, String xRequestId, String dataId) {
+        if (xSignature == null || webhookSecret == null || webhookSecret.isBlank()) {
+            return false;
+        }
+
         try {
-            Page page = pageService.getById(pageId);
-            log.info("[SIMULATE] Pagina encontrada - slug={} email={}", page.getSlug(), page.getUser().getEmail());
+            // Extrai ts e v1 do header x-signature
+            String ts = null;
+            String v1 = null;
+            for (String part : xSignature.split(",")) {
+                String[] kv = part.trim().split("=", 2);
+                if (kv.length == 2) {
+                    if ("ts".equals(kv[0])) ts = kv[1];
+                    if ("v1".equals(kv[0])) v1 = kv[1];
+                }
+            }
 
-            String pageUrl = "https://heartlink-85i3.vercel.app/p/" + page.getSlug();
-            byte[] qrCode = qrCodeService.generateWithFrame(pageUrl, page.getQrCodeFrame());
-            log.info("[SIMULATE] QR code gerado");
+            if (ts == null || v1 == null) return false;
 
-            emailService.sendEmailWithQRCode(page.getUser().getEmail(), page.getUser().getUsername(), qrCode);
-            log.info("[SIMULATE] E-mail enviado para {}", page.getUser().getEmail());
+            // Monta o template conforme documentação MP
+            String manifest = "id:" + dataId + ";request-id:" + xRequestId + ";ts:" + ts + ";";
 
-            pageService.markAsPaid(page.getId());
-            log.info("[SIMULATE] Pagina marcada como PAGA");
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(webhookSecret.getBytes(), "HmacSHA256"));
+            byte[] hash = mac.doFinal(manifest.getBytes());
+            String computed = HexFormat.of().formatHex(hash);
 
-            return ResponseEntity.ok("Página marcada como PAGA e e-mail enviado para: " + page.getUser().getEmail());
+            return computed.equals(v1);
         } catch (Exception e) {
-            log.error("[SIMULATE] Erro: {}", e.getMessage(), e);
-            throw e;
+            log.error("[WEBHOOK] Erro ao validar assinatura: {}", e.getMessage());
+            return false;
         }
     }
+
+    // ❌ simulate-paid REMOVIDO — era uma brecha crítica de segurança
 }
