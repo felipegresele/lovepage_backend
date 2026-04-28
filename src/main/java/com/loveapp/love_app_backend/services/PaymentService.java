@@ -41,6 +41,8 @@ public class PaymentService {
                         .pending("https://www.heartcodegift.com.br/pendente")
                         .build();
 
+        // ✅ Solução compatível com SDK 2.1.7:
+        // Exclui apenas débito e pré-pago — PIX (bank_transfer), crédito e boleto ficam liberados
         PreferencePaymentTypeRequest debitCard =
                 PreferencePaymentTypeRequest.builder()
                         .id("debit_card")
