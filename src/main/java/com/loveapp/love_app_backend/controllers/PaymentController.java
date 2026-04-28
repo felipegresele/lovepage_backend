@@ -85,31 +85,24 @@ public class PaymentController {
 
         BigDecimal amount = dto.getTotalAmount() != null ? dto.getTotalAmount() : dto.getPlanType().getPrice();
 
-        // Salva o frame escolhido (mesma lógica do fluxo de cartão)
         pageService.saveQrCodeFrame(dto.getPageId(), dto.getQrCodeFrame());
 
-        // Pega o email do usuário dono da página para informar ao MP (campo obrigatório)
         Page page = pageService.getById(dto.getPageId());
         String payerEmail = page.getUser().getEmail();
 
         PixPaymentResponseDTO response = paymentService.createPixPayment(amount, payerEmail, dto.getPageId());
 
         log.info("[PIX] Pagamento criado - id={}", response.getPaymentId());
-
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Polling de status do PIX. O frontend chama a cada 3 segundos.
-     * Retorna { status: "pending" | "approved" | "rejected" | "cancelled" }
-     */
+    // 3. Endpoint polling status
     @GetMapping("/pix/status/{paymentId}")
     public ResponseEntity<?> getPixStatus(@PathVariable Long paymentId) throws Exception {
         String status = paymentService.getPixPaymentStatus(paymentId);
         log.info("[PIX] Status consultado - paymentId={} status={}", paymentId, status);
         return ResponseEntity.ok(Map.of("status", status));
     }
-
     // ─────────────────────────────────────────────────────────────────
     // Webhook — único para PIX e cartão/boleto
     // ─────────────────────────────────────────────────────────────────
