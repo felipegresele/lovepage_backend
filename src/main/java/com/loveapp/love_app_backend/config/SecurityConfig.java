@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/payment/webhook").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/pages/public/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/love-pages/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/payment/pix/status/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
