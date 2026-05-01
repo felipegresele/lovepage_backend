@@ -61,7 +61,7 @@ public class PageController {
     public ResponseEntity<?> sendQrCodeEmail(@PathVariable UUID id) {
         try {
             Page page = service.getById(id); // você precisa criar esse método no PageService
-            byte[] qrCode = qrCodeService.generate("https://heartlink-ten.vercel.app/p/" + page.getSlug());
+            byte[] qrCode = qrCodeService.generate("https://www.heartcodegift.com.br/p/" + page.getSlug());
             emailService.sendEmailWithQRCode(
                     page.getUser().getEmail(),
                     page.getUser().getUsername(),
