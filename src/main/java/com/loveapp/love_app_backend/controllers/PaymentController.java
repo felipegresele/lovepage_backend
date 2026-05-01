@@ -145,7 +145,7 @@ public class PaymentController {
             Page page = pageService.getById(UUID.fromString(pageIdStr));
             log.info("[WEBHOOK] Pagina encontrada - slug={} email={}", page.getSlug(), page.getUser().getEmail());
 
-            String pageUrl = "https://heartlink-85i3.vercel.app/p/" + page.getSlug();
+            String pageUrl = "https://www.heartcodegift.com.br/p/" + page.getSlug();
             byte[] qrCode = qrCodeService.generateWithFrame(pageUrl, page.getQrCodeFrame());
 
             emailService.sendEmailWithQRCode(page.getUser().getEmail(), page.getUser().getUsername(), qrCode);
