@@ -2,6 +2,7 @@ package com.loveapp.love_app_backend.modal.dtos;
 
 import com.loveapp.love_app_backend.modal.types.PageStatus;
 import com.loveapp.love_app_backend.modal.types.PlanType;
+import com.loveapp.love_app_backend.modal.types.TipoPresenteado;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -28,6 +29,8 @@ public class CreatePageDTO {
     private LocalDate relationshipStartDate;
 
     private PageStatus status = PageStatus.PENDING;
+
+    private TipoPresenteado tipoPresenteado;
 
     private String musicId;
 

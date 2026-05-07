@@ -9,6 +9,7 @@ import com.loveapp.love_app_backend.modal.dtos.UpdatePageDTO;
 import com.loveapp.love_app_backend.modal.types.PageStatus;
 import com.loveapp.love_app_backend.modal.types.PlanType;
 import com.loveapp.love_app_backend.modal.types.QrCodeFrame;
+import com.loveapp.love_app_backend.modal.types.TipoPresenteado;
 import com.loveapp.love_app_backend.repositories.PageRepository;
 import com.loveapp.love_app_backend.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -53,6 +54,7 @@ public class PageService {
                 .relationshipStartDate(dto.getRelationshipStartDate())
                 .photos(dto.getPhotos())
                 .planType(planType)
+                .tipoPresenteado(dto.getTipoPresenteado() != null ? dto.getTipoPresenteado() : TipoPresenteado.CASAL)
                 .slug(UUID.randomUUID().toString().substring(0, 6))
                 .status(PageStatus.PENDING)
                 .createdAt(LocalDateTime.now())

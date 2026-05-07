@@ -1,0 +1,1 @@
+ALTER TABLE love_pages ADD COLUMN IF NOT EXISTS tipo_presenteado VARCHAR(50) DEFAULT 'CASAL';

@@ -1,10 +1,10 @@
 package com.loveapp.love_app_backend.modal;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.loveapp.love_app_backend.modal.types.PageStatus;
 import com.loveapp.love_app_backend.modal.types.PlanType;
 import com.loveapp.love_app_backend.modal.types.QrCodeFrame;
+import com.loveapp.love_app_backend.modal.types.TipoPresenteado;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -56,6 +56,10 @@ public class Page {
 
     @Enumerated(EnumType.STRING)
     private PageStatus status = PageStatus.PENDING;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_presenteado")
+    private TipoPresenteado tipoPresenteado = TipoPresenteado.CASAL;
 
     private LocalDateTime createdAt;
 
