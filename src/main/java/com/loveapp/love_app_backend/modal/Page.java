@@ -51,6 +51,14 @@ public class Page {
 
     private String theme;
 
+    /**
+     * Define qual template visual é usado para renderizar a página pública
+     * (ex: "PADRAO", "SPOTIFY"). Não confundir com "theme", que controla o
+     * modo de exibição (padrao/classico/simples) dentro do template padrão.
+     */
+    @Builder.Default
+    private String pageTemplate = "PADRAO";
+
     @Enumerated(EnumType.STRING)
     private PlanType planType;
 

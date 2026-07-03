@@ -51,6 +51,7 @@ public class PageService {
                 .musicId(dto.getMusicId())
                 .musicTitle(dto.getMusicTitle())
                 .theme(dto.getTheme())
+                .pageTemplate(dto.getPageTemplate() != null ? dto.getPageTemplate() : "PADRAO")
                 .relationshipStartDate(dto.getRelationshipStartDate())
                 .photos(dto.getPhotos())
                 .planType(planType)
@@ -167,6 +168,9 @@ public class PageService {
         }
         if (dto.getTheme() != null) {
             page.setTheme(dto.getTheme());
+        }
+        if (dto.getPageTemplate() != null) {
+            page.setPageTemplate(dto.getPageTemplate());
         }
         if (dto.getPhotos() != null) {
             page.setPhotos(dto.getPhotos());

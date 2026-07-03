@@ -38,6 +38,8 @@ public class CreatePageDTO {
 
     private String theme;
 
+    private String pageTemplate;
+
     private List<String> photos;
 
     private PlanType planType;

@@ -25,6 +25,8 @@ public class UpdatePageDTO {
 
     private String theme;
 
+    private String pageTemplate;
+
     /**
      * Apenas URLs já hospedadas (Cloudinary).
      * Novas fotos devem passar pelo endpoint de upload antes.
