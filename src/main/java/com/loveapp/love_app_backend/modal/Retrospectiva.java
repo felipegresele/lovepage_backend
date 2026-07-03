@@ -12,6 +12,7 @@ public class Retrospectiva {
     private List<WheelItem>    wheel;
     private List<GalleryItem>  gallery;
     private List<EnigmaItem>   enigma;
+    private BirthChartItem birthChartItem;
     private Boolean efeitoTime = false;
 
     private String ondeSeConheceram;
@@ -34,6 +35,13 @@ public class Retrospectiva {
 
     public List<EnigmaItem> getEnigma() { return enigma; }
     public void setEnigma(List<EnigmaItem> enigma) { this.enigma = enigma; }
+
+    public BirthChartItem getBirthChartItem() {
+        return birthChartItem;
+    }
+    public void setBirthChartItem(BirthChartItem birthChartItem) {
+        this.birthChartItem = birthChartItem;
+    }
 
     public boolean isEfeitoTime() {return efeitoTime;}
     public void setEfeitoTime(boolean efeitoTime) {

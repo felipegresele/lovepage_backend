@@ -211,6 +211,11 @@ public class PageService {
         if (incoming.getEnigma() != null && original.getEnigma() != null) {
             original.setEnigma(incoming.getEnigma());
         }
+
+        if (incoming.getBirthChartItem() != null && original.getBirthChartItem() != null) {
+            original.setBirthChartItem(incoming.getBirthChartItem());
+        }
+
         // efeitoTime é sempre editável se retrospectiva existe
         original.setEfeitoTime(incoming.isEfeitoTime());
 
