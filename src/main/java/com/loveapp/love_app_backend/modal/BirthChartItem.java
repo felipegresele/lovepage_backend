@@ -14,6 +14,8 @@ import org.springframework.cglib.core.Local;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BirthChartItem {
 
+    private String id;
+
     private String textoDeclaracao;
 
     private LocalEnum aondeSeConheceram;
