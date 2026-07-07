@@ -1,6 +1,8 @@
-package com.loveapp.love_app_backend.modal;
+package com.loveapp.love_app_backend.modal.page;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.loveapp.love_app_backend.modal.page.retrospectiva.Retrospectiva;
+import com.loveapp.love_app_backend.modal.user.User;
 import com.loveapp.love_app_backend.modal.types.PageStatus;
 import com.loveapp.love_app_backend.modal.types.PlanType;
 import com.loveapp.love_app_backend.modal.types.QrCodeFrame;

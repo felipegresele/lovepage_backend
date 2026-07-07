@@ -1,6 +1,6 @@
 package com.loveapp.love_app_backend.repositories;
 
-import com.loveapp.love_app_backend.modal.User;
+import com.loveapp.love_app_backend.modal.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

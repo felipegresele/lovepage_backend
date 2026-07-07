@@ -1,9 +1,8 @@
 package com.loveapp.love_app_backend.services;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.loveapp.love_app_backend.modal.Page;
-import com.loveapp.love_app_backend.modal.Retrospectiva;
-import com.loveapp.love_app_backend.modal.User;
+import com.loveapp.love_app_backend.modal.page.Page;
+import com.loveapp.love_app_backend.modal.page.retrospectiva.Retrospectiva;
+import com.loveapp.love_app_backend.modal.user.User;
 import com.loveapp.love_app_backend.modal.dtos.CreatePageDTO;
 import com.loveapp.love_app_backend.modal.dtos.UpdatePageDTO;
 import com.loveapp.love_app_backend.modal.types.PageStatus;
@@ -211,9 +210,8 @@ public class PageService {
         if (incoming.getEnigma() != null && original.getEnigma() != null) {
             original.setEnigma(incoming.getEnigma());
         }
-
-        if (incoming.getBirthChartItem() != null && original.getBirthChartItem() != null) {
-            original.setBirthChartItem(incoming.getBirthChartItem());
+        if (incoming.getRainStarItem() != null && original.getRainStarItem() != null) {
+            original.setRainStarIte(incoming.getRainStarItem());
         }
 
         // efeitoTime é sempre editável se retrospectiva existe

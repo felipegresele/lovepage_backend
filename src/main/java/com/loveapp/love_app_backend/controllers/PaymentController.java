@@ -1,6 +1,6 @@
 package com.loveapp.love_app_backend.controllers;
 
-import com.loveapp.love_app_backend.modal.Page;
+import com.loveapp.love_app_backend.modal.page.Page;
 import com.loveapp.love_app_backend.modal.dtos.CreatePaymentDTO;
 import com.loveapp.love_app_backend.modal.dtos.PixPaymentResponseDTO;
 import com.loveapp.love_app_backend.services.EmailService;

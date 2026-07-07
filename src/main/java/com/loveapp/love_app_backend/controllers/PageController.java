@@ -1,12 +1,9 @@
 package com.loveapp.love_app_backend.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.loveapp.love_app_backend.modal.Page;
-import com.loveapp.love_app_backend.modal.User;
+import com.loveapp.love_app_backend.modal.page.Page;
 import com.loveapp.love_app_backend.modal.dtos.CreatePageDTO;
 import com.loveapp.love_app_backend.modal.dtos.SalvarRetrospectiveDTO;
 import com.loveapp.love_app_backend.modal.dtos.UpdatePageDTO;
-import com.loveapp.love_app_backend.modal.dtos.UpdateRetrospectiveDTO;
 import com.loveapp.love_app_backend.services.EmailService;
 import com.loveapp.love_app_backend.services.PageService;
 import com.loveapp.love_app_backend.services.QRCodeService;

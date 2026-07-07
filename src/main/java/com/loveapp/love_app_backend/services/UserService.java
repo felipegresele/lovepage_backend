@@ -1,6 +1,6 @@
 package com.loveapp.love_app_backend.services;
 
-import com.loveapp.love_app_backend.modal.User;
+import com.loveapp.love_app_backend.modal.user.User;
 import com.loveapp.love_app_backend.repositories.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

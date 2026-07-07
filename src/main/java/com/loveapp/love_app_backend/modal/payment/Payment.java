@@ -1,5 +1,6 @@
-package com.loveapp.love_app_backend.modal;
+package com.loveapp.love_app_backend.modal.payment;
 
+import com.loveapp.love_app_backend.modal.page.Page;
 import jakarta.persistence.*;
 import lombok.*;
 

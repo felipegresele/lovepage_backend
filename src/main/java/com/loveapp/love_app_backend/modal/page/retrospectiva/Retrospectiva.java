@@ -1,4 +1,4 @@
-package com.loveapp.love_app_backend.modal;
+package com.loveapp.love_app_backend.modal.page.retrospectiva;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -12,7 +12,7 @@ public class Retrospectiva {
     private List<WheelItem>    wheel;
     private List<GalleryItem>  gallery;
     private List<EnigmaItem>   enigma;
-    private BirthChartItem birthChartItem;
+    private List<RainStarItem> rainStar;
     private Boolean efeitoTime = false;
 
     private String ondeSeConheceram;
@@ -36,12 +36,8 @@ public class Retrospectiva {
     public List<EnigmaItem> getEnigma() { return enigma; }
     public void setEnigma(List<EnigmaItem> enigma) { this.enigma = enigma; }
 
-    public BirthChartItem getBirthChartItem() {
-        return birthChartItem;
-    }
-    public void setBirthChartItem(BirthChartItem birthChartItem) {
-        this.birthChartItem = birthChartItem;
-    }
+    public List<RainStarItem> getRainStarItem() { return rainStar; }
+    public void setRainStarIte(List<RainStarItem> rainStar) { this.rainStar = rainStar; }
 
     public boolean isEfeitoTime() {return efeitoTime;}
     public void setEfeitoTime(boolean efeitoTime) {

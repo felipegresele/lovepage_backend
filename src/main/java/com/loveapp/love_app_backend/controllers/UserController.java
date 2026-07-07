@@ -1,6 +1,6 @@
 package com.loveapp.love_app_backend.controllers;
 
-import com.loveapp.love_app_backend.modal.User;
+import com.loveapp.love_app_backend.modal.user.User;
 import com.loveapp.love_app_backend.services.JwtService;
 import com.loveapp.love_app_backend.services.UserService;
 import org.springframework.http.ResponseEntity;

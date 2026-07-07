@@ -1,6 +1,6 @@
 package com.loveapp.love_app_backend.modal.dtos;
 
-import com.loveapp.love_app_backend.modal.Retrospectiva;
+import com.loveapp.love_app_backend.modal.page.retrospectiva.Retrospectiva;
 
 import java.util.UUID;
 

@@ -1,4 +1,4 @@
-package com.loveapp.love_app_backend.modal;
+package com.loveapp.love_app_backend.modal.page.retrospectiva;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

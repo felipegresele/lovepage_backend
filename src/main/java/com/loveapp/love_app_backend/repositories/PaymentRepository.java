@@ -1,6 +1,6 @@
 package com.loveapp.love_app_backend.repositories;
 
-import com.loveapp.love_app_backend.modal.Payment;
+import com.loveapp.love_app_backend.modal.payment.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

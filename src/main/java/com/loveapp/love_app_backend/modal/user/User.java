@@ -1,7 +1,8 @@
-package com.loveapp.love_app_backend.modal;
+package com.loveapp.love_app_backend.modal.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.loveapp.love_app_backend.modal.page.Page;
 import jakarta.persistence.*;
 import lombok.*;
 
