@@ -210,9 +210,6 @@ public class PageService {
         if (incoming.getEnigma() != null && original.getEnigma() != null) {
             original.setEnigma(incoming.getEnigma());
         }
-        if (incoming.getRainStarItem() != null && original.getRainStarItem() != null) {
-            original.setRainStarIte(incoming.getRainStarItem());
-        }
         if (incoming.getQuiz() != null && original.getQuiz() != null) {
             original.setQuiz(incoming.getQuiz());
         }

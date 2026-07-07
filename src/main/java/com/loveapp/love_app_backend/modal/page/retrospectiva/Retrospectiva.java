@@ -12,7 +12,6 @@ public class Retrospectiva {
     private List<WheelItem>    wheel;
     private List<GalleryItem>  gallery;
     private List<EnigmaItem>   enigma;
-    private List<RainStarItem> rainStar;
     private List<QuizItem> quiz;
     private Boolean efeitoTime = false;
 
@@ -36,9 +35,6 @@ public class Retrospectiva {
 
     public List<EnigmaItem> getEnigma() { return enigma; }
     public void setEnigma(List<EnigmaItem> enigma) { this.enigma = enigma; }
-
-    public List<RainStarItem> getRainStarItem() { return rainStar; }
-    public void setRainStarIte(List<RainStarItem> rainStar) { this.rainStar = rainStar; }
 
     public List<QuizItem> getQuiz() { return quiz; }
     public void setQuiz(List<QuizItem> quiz) { this.quiz = quiz; }
