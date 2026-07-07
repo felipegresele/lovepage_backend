@@ -213,6 +213,9 @@ public class PageService {
         if (incoming.getRainStarItem() != null && original.getRainStarItem() != null) {
             original.setRainStarIte(incoming.getRainStarItem());
         }
+        if (incoming.getQuiz() != null && original.getQuiz() != null) {
+            original.setQuiz(incoming.getQuiz());
+        }
 
         // efeitoTime é sempre editável se retrospectiva existe
         original.setEfeitoTime(incoming.isEfeitoTime());

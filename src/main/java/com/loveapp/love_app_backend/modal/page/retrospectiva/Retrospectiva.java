@@ -13,6 +13,7 @@ public class Retrospectiva {
     private List<GalleryItem>  gallery;
     private List<EnigmaItem>   enigma;
     private List<RainStarItem> rainStar;
+    private List<QuizItem> quiz;
     private Boolean efeitoTime = false;
 
     private String ondeSeConheceram;
@@ -38,6 +39,9 @@ public class Retrospectiva {
 
     public List<RainStarItem> getRainStarItem() { return rainStar; }
     public void setRainStarIte(List<RainStarItem> rainStar) { this.rainStar = rainStar; }
+
+    public List<QuizItem> getQuiz() { return quiz; }
+    public void setQuiz(List<QuizItem> quiz) { this.quiz = quiz; }
 
     public boolean isEfeitoTime() {return efeitoTime;}
     public void setEfeitoTime(boolean efeitoTime) {
